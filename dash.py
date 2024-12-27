@@ -4,8 +4,8 @@ from openpyxl import load_workbook
 import streamlit as st
 import plotly.express as px
 
-# Título do Dashboard
-st.title("Dashboard de Relatórios de Comissões - Consolidado")
+
+st.title("Dashboard de Relatórios de Assessores")
 
 # Upload de arquivos pela barra lateral
 st.sidebar.header("Upload de Arquivos")
@@ -15,7 +15,7 @@ uploaded_files = st.sidebar.file_uploader(
     accept_multiple_files=True
 )
 
-# Processamento dos arquivos uploadados
+# Processamento dos arquivos
 if uploaded_files:
     dados_consolidados = []
     for arquivo in uploaded_files:
@@ -99,7 +99,7 @@ if not df_consolidado.empty:
                 df_temporal['Comissão Bruta'] / df_temporal['Valor Movimentação']
             ) * 100
 
-            # Ordenação Correta dos Meses
+
             ordem_meses = [
                 'Janeiro', 'Fevereiro', 'Março', 'Abril',
                 'Maio', 'Junho', 'Julho', 'Agosto',
@@ -147,7 +147,7 @@ if not df_consolidado.empty:
             'ROA': "{:.2%}"
         }))
 
-        # Número de operações
+        # Número de operações daquele filtro
         st.write(f"Número de Operações: {len(df_filtrado)}")
     else:
         st.warning("Nenhuma operação encontrada para este filtro.")
