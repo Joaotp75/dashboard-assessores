@@ -3,7 +3,6 @@ import pandas as pd
 from openpyxl import load_workbook
 import streamlit as st
 
-# Título do Dashboard
 st.title("Dashboard de Relatórios de Comissões - Consolidado")
 
 # Upload de arquivos pela barra lateral
@@ -14,7 +13,7 @@ uploaded_files = st.sidebar.file_uploader(
     accept_multiple_files=True
 )
 
-# Processamento dos arquivos uploadados
+# Processamento dos arquivos
 if uploaded_files:
     dados_consolidados = []
     for arquivo in uploaded_files:
