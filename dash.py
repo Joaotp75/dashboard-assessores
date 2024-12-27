@@ -88,7 +88,7 @@ if not df_consolidado.empty:
             'ROA Médio (%)': "{:.2f}%"
         }))
 
-        # Análise Temporal
+        # Análise Temporal - Tabela Mensal
         df_temporal = df_filtrado.groupby('Mês').agg({
             'Valor Movimentação': 'sum',
             'Comissão Bruta': 'sum'
