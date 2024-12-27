@@ -88,63 +88,56 @@ if not df_consolidado.empty:
             'ROA Médio (%)': "{:.2f}%"
         }))
 
-        # Análise Temporal - Tabela Mensal
-        df_temporal = df_filtrado.groupby('Mês').agg({
-            'Valor Movimentação': 'sum',
-            'Comissão Bruta': 'sum'
-        }).reset_index()
+        # Análise Temporal - Tabela e Gráficos (somente se "Todos" os meses forem selecionados)
+        if mes_selecionado == 'Todos':
+            df_temporal = df_filtrado.groupby('Mês').agg({
+                'Valor Movimentação': 'sum',
+                'Comissão Bruta': 'sum'
+            }).reset_index()
 
-        df_temporal['ROA Médio'] = (
-            df_temporal['Comissão Bruta'] / df_temporal['Valor Movimentação']
-        ) * 100
+            df_temporal['ROA Médio'] = (
+                df_temporal['Comissão Bruta'] / df_temporal['Valor Movimentação']
+            ) * 100
 
-        # Ordenação Correta dos Meses
-        ordem_meses = [
-            'Janeiro', 'Fevereiro', 'Março', 'Abril',
-            'Maio', 'Junho', 'Julho', 'Agosto',
-            'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-        ]
-        df_temporal['Mês'] = pd.Categorical(
-            df_temporal['Mês'],
-            categories=ordem_meses,
-            ordered=True
-        )
-        df_temporal = df_temporal.sort_values('Mês')
+            # Ordenação Correta dos Meses
+            ordem_meses = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril',
+                'Maio', 'Junho', 'Julho', 'Agosto',
+                'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ]
+            df_temporal['Mês'] = pd.Categorical(
+                df_temporal['Mês'],
+                categories=ordem_meses,
+                ordered=True
+            )
+            df_temporal = df_temporal.sort_values('Mês')
 
-        st.subheader("Análise Temporal por Mês")
-        st.dataframe(df_temporal.style.format({
-            'Valor Movimentação': "R$ {:,.2f}",
-            'Comissão Bruta': "R$ {:,.2f}",
-            'ROA Médio': "{:.2f}%"
-        }))
+            st.subheader("Análise Temporal por Mês")
+            st.dataframe(df_temporal.style.format({
+                'Valor Movimentação': "R$ {:,.2f}",
+                'Comissão Bruta': "R$ {:,.2f}",
+                'ROA Médio': "{:.2f}%"
+            }))
 
-        # Gráfico Temporal - Movimentação
-        fig_mov = px.line(
-            df_temporal,
-            x='Mês',
-            y='Valor Movimentação',
-            markers=True,
-            title="Evolução da Movimentação por Mês"
-        )
-        fig_mov.update_layout(
-            xaxis_title="Mês",
-            yaxis_title="Valor Movimentação (R$)"
-        )
-        st.plotly_chart(fig_mov)
+            # Gráfico Temporal - Movimentação
+            fig_mov = px.line(
+                df_temporal,
+                x='Mês',
+                y='Valor Movimentação',
+                markers=True,
+                title="Evolução da Movimentação por Mês"
+            )
+            st.plotly_chart(fig_mov)
 
-        # Gráfico Temporal - Comissão
-        fig_com = px.line(
-            df_temporal,
-            x='Mês',
-            y='Comissão Bruta',
-            markers=True,
-            title="Evolução da Comissão por Mês"
-        )
-        fig_com.update_layout(
-            xaxis_title="Mês",
-            yaxis_title="Comissão Bruta (R$)"
-        )
-        st.plotly_chart(fig_com)
+            # Gráfico Temporal - Comissão
+            fig_com = px.line(
+                df_temporal,
+                x='Mês',
+                y='Comissão Bruta',
+                markers=True,
+                title="Evolução da Comissão por Mês"
+            )
+            st.plotly_chart(fig_com)
 
         # Exibe Tabela de Operações
         st.subheader("Operações no Período")
