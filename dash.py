@@ -2,7 +2,9 @@ import os
 import pandas as pd
 from openpyxl import load_workbook
 import streamlit as st
+import plotly.express as px
 
+# Título do Dashboard
 st.title("Dashboard de Relatórios de Comissões - Consolidado")
 
 # Upload de arquivos pela barra lateral
@@ -13,14 +15,13 @@ uploaded_files = st.sidebar.file_uploader(
     accept_multiple_files=True
 )
 
-# Processamento dos arquivos
+# Processamento dos arquivos uploadados
 if uploaded_files:
     dados_consolidados = []
     for arquivo in uploaded_files:
         wb = load_workbook(arquivo, data_only=True)
         codigo_assessor = arquivo.name[:6]  # Extrai o código do nome do arquivo
 
-        # Lê cada aba (mês) do arquivo
         for aba in wb.sheetnames:
             ws = wb[aba]
 
@@ -47,7 +48,7 @@ else:
     st.warning("Nenhum arquivo foi enviado.")
     df_consolidado = pd.DataFrame()
 
-# Processo de filtro e exibição do dashboard
+# Exibe filtros e resumo
 if not df_consolidado.empty:
     st.sidebar.header("Filtros")
 
@@ -57,6 +58,7 @@ if not df_consolidado.empty:
     meses_unicos = ['Todos'] + list(df_consolidado['Mês'].unique())
     mes_selecionado = st.sidebar.selectbox("Mês do Lançamento", meses_unicos)
 
+    # Filtragem dos dados
     if codigo_selecionado == 'Todos':
         df_filtrado = df_consolidado
     else:
@@ -68,9 +70,9 @@ if not df_consolidado.empty:
     st.write(f"Lançamentos para {codigo_selecionado} - {mes_selecionado}")
 
     if not df_filtrado.empty:
+        # Tabela Resumo
         captacao_total = df_filtrado['Valor Movimentação'].sum()
         comissao_total = df_filtrado['Comissão Bruta'].sum()
-
         roa_medio = comissao_total / captacao_total if captacao_total > 0 else 0
 
         resumo = pd.DataFrame({
@@ -86,6 +88,39 @@ if not df_consolidado.empty:
             'ROA Médio (%)': "{:.2f}%"
         }))
 
+        # Análise Temporal
+        df_temporal = df_filtrado.groupby('Mês').agg({
+            'Valor Movimentação': 'sum',
+            'Comissão Bruta': 'sum'
+        }).reset_index()
+
+        df_temporal['ROA Médio'] = (
+            df_temporal['Comissão Bruta'] / df_temporal['Valor Movimentação']
+        ) * 100
+
+        st.subheader("Análise Temporal por Mês")
+        st.dataframe(df_temporal.style.format({
+            'Valor Movimentação': "R$ {:,.2f}",
+            'Comissão Bruta': "R$ {:,.2f}",
+            'ROA Médio': "{:.2f}%"
+        }))
+
+        # Gráfico Temporal
+        fig = px.line(
+            df_temporal,
+            x='Mês',
+            y=['Valor Movimentação', 'Comissão Bruta'],
+            markers=True,
+            title="Evolução de Movimentação e Comissão por Mês"
+        )
+        fig.update_layout(
+            xaxis_title="Mês",
+            yaxis_title="Valor (R$)",
+            legend_title_text='Indicador'
+        )
+        st.plotly_chart(fig)
+
+        # Exibe Tabela de Operações
         st.subheader("Operações no Período")
         st.dataframe(df_filtrado.style.format({
             'Valor Movimentação': "R$ {:,.2f}",
@@ -93,6 +128,7 @@ if not df_consolidado.empty:
             'ROA': "{:.2%}"
         }))
 
+        # Número de operações
         st.write(f"Número de Operações: {len(df_filtrado)}")
     else:
         st.warning("Nenhuma operação encontrada para este filtro.")
